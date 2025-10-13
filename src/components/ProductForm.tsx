@@ -25,6 +25,8 @@ export default function ProductForm({ onSubmit, onClose, isOpen, productToEdit }
 
   const isEditMode = !!productToEdit;
 
+  if (!isOpen) return null;
+
   useEffect(() => {
     if (isOpen) {
       if (isEditMode && productToEdit) {
@@ -50,8 +52,6 @@ export default function ProductForm({ onSubmit, onClose, isOpen, productToEdit }
       setIsSubmitting(false);
     }
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
