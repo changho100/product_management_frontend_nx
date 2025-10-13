@@ -70,7 +70,7 @@ export const productApi = {
   // 제품 삭제
   deleteProduct: async (id: number): Promise<void> => {
     try {
-      await api.delete(`/products/${id}`);
+      await api.post(`/products/${id}/delete`);
     } catch (error) {
       console.error(`Failed to delete product ${id}:`, error);
       throw new Error('제품 삭제에 실패했습니다.');
