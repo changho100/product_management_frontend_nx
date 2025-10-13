@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { productApi, Product } from '@/lib/api';
+import { productApi, Product } from '@/lib/api'; // 수정: ProductForm을 위해 ProductForm도 가져옵니다.
 import Navbar from '@/components/Navbar';
-import { ArrowLeft, Trash2, Package } from 'lucide-react';
+import ProductForm from '@/components/ProductForm';
+import { ArrowLeft, Trash2, Package, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface ProductDetailPageProps {
@@ -14,6 +15,7 @@ interface ProductDetailPageProps {
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -43,6 +45,19 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     } catch (error) {
       console.error('Failed to delete product:', error);
       toast.error('제품 삭제에 실패했습니다.');
+    }
+  };
+
+  const handleFormSubmit = async (productData: Omit<Product, 'id' | 'createdAt'>) => {
+    if (!product) return;
+    try {
+      await productApi.updateProduct(product.id!, productData);
+      toast.success('제품이 성공적으로 수정되었습니다.');
+      setIsEditFormOpen(false);
+      loadProduct(); // 수정된 정보 다시 불러오기
+    } catch (error) {
+      console.error('Failed to update product:', error);
+      toast.error('제품 수정에 실패했습니다.');
     }
   };
 
@@ -92,14 +107,22 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             <ArrowLeft className="h-4 w-4" />
             <span>목록으로</span>
           </button>
-          
-          <button
-            onClick={handleDelete}
-            className="btn-danger flex items-center space-x-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            <span>삭제</span>
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setIsEditFormOpen(true)}
+              className="btn-secondary flex items-center space-x-2"
+            >
+              <Edit className="h-4 w-4" />
+              <span>수정</span>
+            </button>
+            <button
+              onClick={handleDelete}
+              className="btn-danger flex items-center space-x-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span>삭제</span>
+            </button>
+          </div>
         </div>
 
         <div className="card p-8">
@@ -143,6 +166,13 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           </div>
         </div>
       </div>
+
+      <ProductForm
+        isOpen={isEditFormOpen}
+        onClose={() => setIsEditFormOpen(false)}
+        onSubmit={handleFormSubmit}
+        productToEdit={product}
+      />
     </div>
   );
 }
