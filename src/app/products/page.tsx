@@ -1,11 +1,13 @@
+// src/app/products/page.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { productApi, Product } from '@/lib/api';
-import Navbar from '@/components/Navbar';
-import ProductCard from '@/components/ProductCard';
+import Navbar from '@/components/navbar';
 import ProductForm from '@/components/ProductForm';
 import SearchBar from '@/components/SearchBar';
+import ProductRow from '@/components/ProductRow';
 import { Plus, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -14,6 +16,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
 
   useEffect(() => {
     loadProducts();
@@ -32,14 +35,34 @@ export default function ProductsPage() {
     }
   };
 
-  const handleAddProduct = async (productData: Omit<Product, 'id' | 'createdAt'>) => {
+  const openAddForm = () => {
+    setProductToEdit(null);
+    setIsFormOpen(true);
+  };
+
+  const openEditForm = (product: Product) => {
+    setProductToEdit(product);
+    setIsFormOpen(true);
+  };
+
+  const closeForm = () => {
+    setIsFormOpen(false);
+    setProductToEdit(null);
+  };
+
+  const handleFormSubmit = async (productData: Omit<Product, 'id' | 'createdAt'>) => {
     try {
-      await productApi.createProduct(productData);
-      toast.success('제품이 성공적으로 추가되었습니다.');
+      if (productToEdit) {
+        await productApi.updateProduct(productToEdit.id!, productData);
+        toast.success('제품이 성공적으로 수정되었습니다.');
+      } else {
+        await productApi.createProduct(productData);
+        toast.success('제품이 성공적으로 추가되었습니다.');
+      }
       loadProducts();
     } catch (error) {
-      console.error('Failed to add product:', error);
-      toast.error('제품 추가에 실패했습니다.');
+      console.error('Failed to save product:', error);
+      toast.error(productToEdit ? '제품 수정에 실패했습니다.' : '제품 추가에 실패했습니다.');
     }
   };
 
@@ -106,7 +129,7 @@ export default function ProductsPage() {
             )}
           </div>
           <button
-            onClick={() => setIsFormOpen(true)}
+            onClick={openAddForm}
             className="btn-primary flex items-center space-x-2"
           >
             <Plus className="h-4 w-4" />
@@ -133,21 +156,39 @@ export default function ProductsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onDelete={handleDeleteProduct}
-              />
-            ))}
+          <div className="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제품명</th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">가격</th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">수량</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">등록일</th>
+                  <th scope="col" className="relative px-6 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {products.map((product) => (
+                  <ProductRow
+                    key={product.id}
+                    product={product}
+                    onDelete={handleDeleteProduct}
+                    onEdit={openEditForm}
+                  />
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
         <ProductForm
           isOpen={isFormOpen}
-          onSubmit={handleAddProduct}
-          onClose={() => setIsFormOpen(false)}
+          onSubmit={handleFormSubmit}
+          onClose={closeForm}
+          productToEdit={productToEdit}
         />
       </div>
     </div>

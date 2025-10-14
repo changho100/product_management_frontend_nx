@@ -1,23 +1,30 @@
+// src/components/ProductCard.tsx
+
 'use client';
 
 import { Product } from '@/lib/api';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2, Edit } from 'lucide-react';
 import Link from 'next/link';
 import { FC, useCallback } from 'react';
 
 interface ProductCardProps {
   product: Product;
   onDelete: (id: number) => Promise<void> | void;
+  onEdit: (product: Product) => void;
 }
 
-const ProductCard: FC<ProductCardProps> = ({ product, onDelete }) => {
+const ProductCard: FC<ProductCardProps> = ({ product, onDelete, onEdit }) => {
   const handleDelete = useCallback(() => {
-    if (window.confirm('정말 삭제하시겠습니까?')) {
+    if (window.confirm(`'${product.name}' 제품을 정말 삭제하시겠습니까?`)) {
       if (product.id) {
         onDelete(product.id);
       }
     }
-  }, [product.id, onDelete]);
+  }, [product.id, product.name, onDelete]);
+
+  const handleEdit = useCallback(() => {
+    onEdit(product);
+  }, [product, onEdit]);
 
   const formatDate = (dateString?: string): string => {
     if (!dateString) return '';
@@ -42,6 +49,14 @@ const ProductCard: FC<ProductCardProps> = ({ product, onDelete }) => {
           >
             <Eye className="h-4 w-4" aria-hidden="true" />
           </Link>
+          <button
+            onClick={handleEdit}
+            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+            aria-label={`${product.name} 수정`}
+            type="button"
+          >
+            <Edit className="h-4 w-4" aria-hidden="true" />
+          </button>
           <button
             onClick={handleDelete}
             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
