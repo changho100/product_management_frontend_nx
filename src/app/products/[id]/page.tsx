@@ -1,9 +1,11 @@
+// src/app/products/[id]/page.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { productApi, Product } from '@/lib/api'; // 수정: ProductForm을 위해 ProductForm도 가져옵니다.
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/navbar';
 import ProductForm from '@/components/ProductForm';
 import { ArrowLeft, Trash2, Package, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';

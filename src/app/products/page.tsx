@@ -1,8 +1,10 @@
+// src/app/products/page.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { productApi, Product } from '@/lib/api';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/navbar';
 import ProductForm from '@/components/ProductForm';
 import SearchBar from '@/components/SearchBar';
 import ProductRow from '@/components/ProductRow';
