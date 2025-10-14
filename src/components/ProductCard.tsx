@@ -1,3 +1,5 @@
+// src/components/ProductCard.tsx
+
 'use client';
 
 import { Product } from '@/lib/api';

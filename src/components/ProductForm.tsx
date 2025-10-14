@@ -1,3 +1,5 @@
+// src/components/ProductForm.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';

@@ -1,3 +1,5 @@
+// src/components/ProductRow.tsx
+
 'use client';
 
 import { Product } from '@/lib/api';
