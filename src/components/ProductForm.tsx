@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Product } from '@/lib/api';
 import { X } from 'lucide-react';
@@ -9,6 +9,7 @@ interface ProductFormProps {
   onSubmit: (product: Omit<Product, 'id' | 'createdAt'>) => void;
   onClose: () => void;
   isOpen: boolean;
+  initialData?: Product | null;
 }
 
 interface FormData {
@@ -18,9 +19,21 @@ interface FormData {
   quantity: number;
 }
 
-export default function ProductForm({ onSubmit, onClose, isOpen }: ProductFormProps) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>();
+export default function ProductForm({ onSubmit, onClose, isOpen, initialData }: ProductFormProps) {
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isEditMode = !!initialData;
+
+  useEffect(() => {
+    if (isEditMode && initialData) {
+      setValue('name', initialData.name);
+      setValue('description', initialData.description || '');
+      setValue('price', initialData.price);
+      setValue('quantity', initialData.quantity);
+    } else {
+      reset();
+    }
+  }, [isOpen, initialData, isEditMode, setValue, reset]);
 
   const handleFormSubmit = async (data: FormData) => {
     setIsSubmitting(true);
@@ -41,7 +54,9 @@ export default function ProductForm({ onSubmit, onClose, isOpen }: ProductFormPr
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">새 제품 추가</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {isEditMode ? '제품 수정' : '새 제품 추가'}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -133,7 +148,7 @@ export default function ProductForm({ onSubmit, onClose, isOpen }: ProductFormPr
               className="btn-primary flex-1"
               disabled={isSubmitting}
             >
-              {isSubmitting ? '저장 중...' : '저장'}
+              {isSubmitting ? (isEditMode ? '수정 중...' : '저장 중...') : (isEditMode ? '수정' : '저장')}
             </button>
           </div>
         </form>

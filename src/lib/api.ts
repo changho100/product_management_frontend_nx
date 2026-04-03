@@ -56,6 +56,17 @@ export const productApi = {
     }
   },
 
+  // 제품 수정
+  updateProduct: async (id: number, product: ProductCreateRequest): Promise<Product> => {
+    try {
+      const response: AxiosResponse<Product> = await api.put(`/products/${id}`, product);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to update product ${id}:`, error);
+      throw new Error('제품 수정에 실패했습니다.');
+    }
+  },
+
   // 제품 삭제
   deleteProduct: async (id: number): Promise<void> => {
     try {
